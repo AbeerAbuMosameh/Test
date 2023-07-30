@@ -26,11 +26,11 @@ class ResetPasswordMail extends Mailable
 
     public function build()
     {
-        return $this->from('abeermosameh@gmail.com', 'Training hub')
-            ->subject('Test Mail')
-            ->view('emails.reset_password')->with([
-                'code' =>  $this->$code
-            ]);
+//        return $this->from('abeermosameh@gmail.com', 'Training hub')
+//            ->subject('Test Mail')
+//            ->view('emails.reset_password')->with([
+//                'code' =>  $this->$code
+//            ]);
 
 
     }
