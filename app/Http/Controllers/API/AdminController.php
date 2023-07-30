@@ -33,9 +33,7 @@ class AdminController extends Controller
         if ($validated_data->fails()) {
             return $this->errorResponse([], $validated_data->errors()->first(), 422);
         }
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json', // Set Content-Type header to JSON
-        ])->post('http://127.0.0.1:8081/oauth/token', [
+        $response = Http::post('http://127.0.0.1:8081/oauth/token', [
             'grant_type' => 'password',
             'client_id' => 1,
             'client_secret' => 'xf7vFLANs0ByrbZN7eOddMgK6yw12GZeuqaUM0MW',
