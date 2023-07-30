@@ -33,17 +33,27 @@ class AdminController extends Controller
         if ($validated_data->fails()) {
             return $this->errorResponse([], $validated_data->errors()->first(), 422);
         }
-        $response = Http::post('http://127.0.0.1:8081/oauth/token', [
-            'grant_type' => 'password',
-            'client_id' => 1,
-            'client_secret' => 'xf7vFLANs0ByrbZN7eOddMgK6yw12GZeuqaUM0MW',
-            'username' => $request->input('email'),
-            'password' => $request->input('password'),
-            'scope' => '',
-        ]);
+        try {
+            $response = Http::post('http://127.0.0.1:8081/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => 1,
+                'client_secret' => 'xf7vFLANs0ByrbZN7eOddMgK6yw12GZeuqaUM0MW',
+                'username' => $request->input('email'),
+                'password' => $request->input('password'),
+                'scope' => '',
+            ]);
 
-        return $this->successResponse(['token' => $response], trans('auth.login_success'));
+            $responseData = $response->json();
 
+            if (isset($responseData['access_token'])) {
+                $accessToken = $responseData['access_token'];
+                return $this->successResponse(['token' => $accessToken], trans('auth.login_success'));
+            } else {
+                return $this->errorResponse([], 'Error: Access token not found in response.', 500);
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse([], 'Error: Unable to connect to the OAuth server.', 500);
+        }
     }
 
 //    public function login(Request $request)

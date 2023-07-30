@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
@@ -28,14 +29,26 @@ class ClientUserController extends Controller
             return $this->errorResponse($validated_data->errors(), trans('messages.login_failed'), 422);
         }
 
-        $admin = ClientUser::where('email', $request->input('email'))->first();
+        try {
+            $response = Http::post('http://127.0.0.1:8081/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => 3,
+                'client_secret' => '81I8uw7KVq0cea4IvuUt4lOzpIEy7D2oaNmm61Mq',
+                'username' => $request->input('email'),
+                'password' => $request->input('password'),
+                'scope' => '',
+            ]);
 
-        if (Hash::check($request->input('password'), $admin->password)) {
-            $token = $admin->createToken('Client-Api-Token')->accessToken;
-            $admin->setAttribute('token', $token);
-            return $this->successResponse(['token' => $token], trans('auth.login_success'));
-        } else {
-            return $this->errorResponse([], trans('auth.failed'), 422);
+            $responseData = $response->json();
+
+            if (isset($responseData['access_token'])) {
+                $accessToken = $responseData['access_token'];
+                return $this->successResponse(['token' => $accessToken], trans('auth.login_success'));
+            } else {
+                return $this->errorResponse([], 'Error: Access token not found in response.', 500);
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse([], 'Error: Unable to connect to the OAuth server.', 500);
         }
     }
 
@@ -89,9 +102,7 @@ class ClientUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('Client Access Token')->accessToken;
-
-        return $this->successResponse(['token' => $token], trans('auth.register_success'), 201);
+        return $this->successResponse(['user' => $user], trans('auth.register_success'), 201);
     }
 
     public function logout(Request $request)
