@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\ClientUserController;
+use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\VendorUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -46,4 +47,9 @@ Route::group(['prefix' => 'client'], function () {
     Route::get('profile', [ClientUserController::class, 'getProfile'])->middleware('auth:client');
     Route::post('forget-password', [ClientUserController::class, 'forgetPassword']);
     Route::post('register', [ClientUserController::class, 'register']);
+});
+
+// Product routes
+Route::prefix('products')->group(function () {
+    Route::apiResource('products', ProductController::class);
 });
